@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="14天恢复">
+<meta name="theme-color" content="#2C5282">
+<title>14天恢复计划</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%232C5282'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.35em' font-family='Arial' font-size='100' font-weight='bold' fill='white'%3E14%3C/text%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:#F5F7FA;color:#1A202C;font-size:16px;line-height:1.5;padding-bottom:80px;-webkit-user-select:none;user-select:none}
+.container{max-width:500px;margin:0 auto;padding:0 16px}
+.header{background:linear-gradient(135deg,#2C5282 0%,#4A7FB8 100%);color:#fff;padding:env(safe-area-inset-top,20px) 16px 20px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.header h1{font-size:20px;font-weight:600;margin-bottom:4px}
+.header p{font-size:12px;opacity:0.9}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #E2E8F0;position:sticky;top:75px;z-index:99;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:12px 16px;font-size:14px;color:#4A5568;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab.active{color:#2C5282;border-bottom-color:#2C5282;font-weight:600}
+.content{padding:16px 0}
+.section{display:none}
+.section.active{display:block}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.card-title{font-size:16px;font-weight:600;color:#2C5282;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:"";width:4px;height:16px;background:#2C5282;border-radius:2px}
+.time-slot{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid #F0F3F7;gap:12px}
+.time-slot:last-child{border-bottom:none}
+.time{font-weight:600;color:#2C5282;min-width:60px;font-size:14px}
+.task{flex:1;font-size:14px;color:#2D3748}
+.task.drug{color:#C53030}
+.task.exercise{color:#2F855A}
+.task.meal{color:#975A16}
+.task.kegel{color:#2B6CB0}
+.checkbox{width:24px;height:24px;border:2px solid #CBD5E0;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s}
+.checkbox.checked{background:#2C5282;border-color:#2C5282}
+.checkbox.checked::after{content:"";width:8px;height:14px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-2px)}
+.day-selector{display:flex;overflow-x:auto;padding:8px 0;gap:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.day-selector::-webkit-scrollbar{display:none}
+.day-btn{flex-shrink:0;padding:10px 14px;background:#fff;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;color:#4A5568;text-align:center;cursor:pointer;min-width:70px}
+.day-btn.active{background:#2C5282;color:#fff;border-color:#2C5282;font-weight:600}
+.day-btn .dow{font-size:11px;opacity:0.8;display:block;margin-bottom:2px}
+.day-btn .date{font-size:14px;font-weight:600}
+.day-btn.today{border-color:#C53030;position:relative}
+.day-btn.today::after{content:"今";position:absolute;top:-6px;right:-6px;background:#C53030;color:#fff;font-size:10px;padding:2px 5px;border-radius:8px}
+.alert{background:#FFF5E1;border-left:4px solid #D69E2E;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px;color:#744210}
+.alert.danger{background:#FED7D7;border-color:#C53030;color:#742A2A}
+.alert.success{background:#C6F6D5;border-color:#38A169;color:#22543D}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F0F3F7;font-size:14px}
+.info-row:last-child{border-bottom:none}
+.info-row .label{color:#4A5568}
+.info-row .value{font-weight:600;color:#1A202C}
+.meal-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px}
+.meal-card h4{font-size:14px;color:#2C5282;margin-bottom:6px;font-weight:600}
+.meal-card p{font-size:14px;color:#2D3748;line-height:1.6}
+.exercise-item{padding:12px;background:#F7FAFC;border-radius:8px;margin-bottom:8px;font-size:13px}
+.exercise-item strong{color:#2C5282;display:block;margin-bottom:4px;font-size:14px}
+.progress{background:#F0F3F7;height:8px;border-radius:4px;overflow:hidden;margin:12px 0}
+.progress-bar{background:linear-gradient(90deg,#38A169,#48BB78);height:100%;transition:width 0.3s}
+.big-num{font-size:28px;font-weight:700;color:#2C5282;text-align:center;margin:12px 0}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{background:#fff;border-radius:10px;padding:14px;text-align:center}
+.stat-card .num{font-size:22px;font-weight:700;color:#2C5282}
+.stat-card .lbl{font-size:12px;color:#4A5568;margin-top:4px}
+.divider{height:1px;background:#E2E8F0;margin:16px 0}
+.small{font-size:12px;color:#718096;margin-top:4px}
+.emph{background:#FFF5E1;padding:2px 6px;border-radius:4px;color:#975A16;font-weight:600}
+ul{padding-left:20px}
+li{margin-bottom:6px;font-size:14px}
+.btn-clear{background:#FED7D7;color:#742A2A;border:none;padding:10px;border-radius:8px;width:100%;font-size:14px;margin-top:12px;cursor:pointer}
+.celebrate{background:linear-gradient(135deg,#38A169,#48BB78);color:#fff;padding:20px;border-radius:12px;text-align:center;margin-bottom:12px}
+.celebrate h3{font-size:18px;margin-bottom:6px}
+.celebrate p{font-size:13px;opacity:0.95}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>14天恢复计划</h1>
+<p>4/17 - 4/30 · 硬度+持久度+改善内脏脂肪</p>
+</div>
+
+<div class="tabs" id="tabs">
+<div class="tab active" data-tab="today">今日</div>
+<div class="tab" data-tab="calendar">日历</div>
+<div class="tab" data-tab="meals">食谱</div>
+<div class="tab" data-tab="exercise">运动</div>
+<div class="tab" data-tab="drugs">吃药</div>
+<div class="tab" data-tab="shop">购物</div>
+<div class="tab" data-tab="stats">进度</div>
+<div class="tab" data-tab="tips">禁忌</div>
+</div>
+
+<div class="container content">
+
+<div class="section active" id="today">
+<div id="today-content"></div>
+</div>
+
+<div class="section" id="calendar">
+<div class="card">
+<div class="card-title">14天日历（点击查看某天）</div>
+<div class="day-selector" id="day-selector"></div>
+<div id="day-detail"></div>
+</div>
+</div>
+
+<div class="section" id="meals">
+<div class="card">
+<div class="card-title">今日三餐</div>
+<div id="today-meals"></div>
+</div>
+<div class="card">
+<div class="card-title">所有日食谱</div>
+<div id="all-meals"></div>
+</div>
+</div>
+
+<div class="section" id="exercise">
+<div class="card">
+<div class="card-title">凯格尔运动（每天必做）</div>
+<div class="exercise-item"><strong>第1-7天基础</strong>收紧5秒→放松5秒，10次为1组，每天3组（早中晚）</div>
+<div class="exercise-item"><strong>第8-14天进阶</strong>收紧10秒→放松5秒，10次为1组，每组加快速收放10次</div>
+<div class="exercise-item"><strong>要点</strong>排空膀胱后做，不屏气、不夹臀。像憋尿那块肌肉发力。坐/站/躺都行</div>
+</div>
+
+<div class="card">
+<div class="card-title">蛙泳（有氧主力）</div>
+<div class="alert">★关键：不要用力蹬腿，以手臂划水为主。腿酸立即停</div>
+<div class="exercise-item"><strong>周六 40min</strong>蛙泳为主，蹬腿不用全力；5圈休息30秒循环</div>
+<div class="exercise-item"><strong>周三 40min</strong>下班后去，节奏不冲刺</div>
+<div class="exercise-item"><strong>周六 50min</strong>加入漂浮放松节奏</div>
+<div class="exercise-item"><strong>周三 40min</strong>最后一次游泳日</div>
+</div>
+
+<div class="card">
+<div class="card-title">健身房A日（周二·推）</div>
+<div class="exercise-item"><strong>1. 热身</strong>椭圆机5分钟（不用跑步机）</div>
+<div class="exercise-item"><strong>2. 坐姿推胸</strong>4组×10-12次，能做12次的重量</div>
+<div class="exercise-item"><strong>3. 哑铃卧推</strong>3组×10次，单只10-15kg</div>
+<div class="exercise-item"><strong>4. 坐姿肩推</strong>3组×10次</div>
+<div class="exercise-item"><strong>5. 侧平举</strong>3组×12次，单只4-6kg</div>
+<div class="exercise-item"><strong>6. 绳索三头下压</strong>3组×12次</div>
+<div class="exercise-item"><strong>7. 平板支撑</strong>3组×45秒</div>
+<div class="exercise-item"><strong>8. 死虫式</strong>3组×12次</div>
+<div class="exercise-item"><strong>9. 拉伸</strong>5-8分钟</div>
+</div>
+
+<div class="card">
+<div class="card-title">健身房B日（周四·拉）</div>
+<div class="exercise-item"><strong>1. 热身</strong>椭圆机5分钟</div>
+<div class="exercise-item"><strong>2. 高位下拉</strong>4组×10-12次</div>
+<div class="exercise-item"><strong>3. 坐姿划船</strong>4组×10次</div>
+<div class="exercise-item"><strong>4. 哑铃单臂划船</strong>3组×10次（左右各）</div>
+<div class="exercise-item"><strong>5. 面拉Face Pull</strong>3组×15次（轻重量）</div>
+<div class="exercise-item"><strong>6. 哑铃弯举</strong>3组×12次</div>
+<div class="exercise-item"><strong>7. 锤式弯举</strong>3组×10次</div>
+<div class="exercise-item"><strong>8. 侧平板</strong>3组×30秒（左右各）</div>
+<div class="exercise-item"><strong>9. 仰卧卷腹</strong>3组×15次</div>
+<div class="exercise-item"><strong>10. 拉伸</strong>5-8分钟</div>
+</div>
+
+<div class="card">
+<div class="card-title">快走</div>
+<div class="exercise-item"><strong>速度</strong>6-7km/h，有点喘但能说话</div>
+<div class="exercise-item"><strong>心率</strong>110-130</div>
+<div class="exercise-item"><strong>时长</strong>30-40分钟连续</div>
+<div class="exercise-item"><strong>最佳时机</strong>饭后30分钟开始</div>
+</div>
+
+<div class="alert danger">★绝对禁区★ 深蹲、硬拉、弓步、跑步机、动感单车、HIIT、任何腿部器械</div>
+</div>
+
+<div class="section" id="drugs">
+<div class="alert">艾普拉唑 饭前30-60分钟空腹吃<br>阿莫西林+呋喃唑酮 饭后吃<br>复方铝酸铋 饭后吃，但要在抗生素之后30分钟</div>
+
+<div class="card">
+<div class="card-title">每日6个关键时间点</div>
+<div class="time-slot">
+<span class="time">9:15</span>
+<span class="task drug">艾普拉唑（早餐前空腹）</span>
+</div>
+<div class="time-slot">
+<span class="time">10:15</span>
+<span class="task drug">阿莫西林 + 呋喃唑酮（早餐后）</span>
+</div>
+<div class="time-slot">
+<span class="time">10:45</span>
+<span class="task drug">复方铝酸铋（早餐后30分钟）</span>
+</div>
+<div class="time-slot">
+<span class="time">14:30</span>
+<span class="task drug">复方铝酸铋（午餐后）</span>
+</div>
+<div class="time-slot">
+<span class="time">19:00</span>
+<span class="task drug">艾普拉唑（晚餐前空腹）</span>
+</div>
+<div class="time-slot">
+<span class="time">20:00</span>
+<span class="task drug">阿莫西林 + 呋喃唑酮（晚餐后）</span>
+</div>
+<div class="time-slot">
+<span class="time">20:30</span>
+<span class="task drug">复方铝酸铋（晚餐后30分钟）</span>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">保健品（不是药）</div>
+<div class="time-slot">
+<span class="time">13:00</span>
+<span class="task meal">鱼油 2粒 + 维D 1粒（午餐随餐）</span>
+</div>
+<div class="time-slot">
+<span class="time">19:15</span>
+<span class="task meal">鱼油 1粒（晚餐随餐）</span>
+</div>
+<p class="small">您的鱼油是625mg/粒高纯度，每天3粒（1875mg EPA+DHA）是理想剂量。分两次吃吸收更好</p>
+</div>
+
+<div class="alert danger">注意：<br>1. 抗生素和铝酸铋间隔30分钟，否则影响吸收<br>2. 奶制品和阿莫西林间隔1小时<br>3. 浓茶咖啡和药间隔2小时以上<br>4. 绝对不能喝酒（任何量）</div>
+</div>
+
+<div class="section" id="shop">
+<div class="card">
+<div class="card-title">周六大采购（第1次）</div>
+<p class="small">按分类一次性买齐</p>
+<div class="divider"></div>
+<strong style="color:#C53030">蛋白核心</strong>
+<ul>
+<li>鸡蛋 30个</li>
+<li>鸡胸肉 1kg（分装冷冻）</li>
+<li>牛肉（里脊/腱子）800g</li>
+<li>鱼（鲭鱼/鲳鱼/黄花鱼任选）5条</li>
+<li>冷冻虾仁 500g</li>
+<li>牡蛎 500g</li>
+<li>北豆腐 2盒</li>
+</ul>
+<strong style="color:#975A16">乳制品</strong>
+<ul>
+<li>无糖希腊酸奶 8杯</li>
+<li>纯牛奶 2升</li>
+<li>无糖豆浆 2升</li>
+</ul>
+<strong style="color:#2F855A">深绿蔬菜</strong>
+<ul>
+<li>菠菜 1kg（含镁）</li>
+<li>西兰花 3颗</li>
+<li>芥蓝/空心菜 1kg</li>
+<li>芦笋 500g</li>
+</ul>
+<strong style="color:#2F855A">彩色蔬菜</strong>
+<ul>
+<li>番茄 1kg、彩椒 500g、胡萝卜 500g、生菜 2棵</li>
+</ul>
+<strong style="color:#744210">低GI主食</strong>
+<ul>
+<li>土豆 10个、红薯 6个</li>
+<li>糙米 2kg</li>
+<li>原味燕麦 500g、全麦面包 1条</li>
+<li>南瓜 1个</li>
+</ul>
+<strong style="color:#744210">好脂肪</strong>
+<ul>
+<li>核桃、扁桃仁、南瓜子、腰果 各200g</li>
+<li>牛油果 4个</li>
+<li>特级初榨橄榄油 1瓶</li>
+<li>亚麻籽/奇亚籽 1包</li>
+</ul>
+<strong style="color:#2C5282">水果</strong>
+<ul>
+<li>蓝莓 2盒、苹果 4个、香蕉 1小把、柠檬 2个</li>
+</ul>
+<strong style="color:#2C5282">调味</strong>
+<ul>
+<li>低钠生抽、米醋、蒸鱼豉油、黑胡椒、料酒</li>
+<li>姜、蒜、葱 必备</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="card-title">周三补货（第2次）</div>
+<ul>
+<li>鸡胸肉 500g</li>
+<li>牛肉 500g</li>
+<li>鸡蛋 20个</li>
+<li>鱼 2-3条</li>
+<li>虾仁 300g</li>
+<li>深绿蔬菜 1kg</li>
+<li>牛奶/酸奶/水果 按消耗补</li>
+</ul>
+</div>
+</div>
+
+<div class="section" id="stats">
+<div id="stats-content"></div>
+</div>
+
+<div class="section" id="tips">
+<div class="alert danger">★14天绝对禁忌★</div>
+<div class="card">
+<ul>
+<li><strong>喝酒</strong>（呋喃唑酮+酒=休克风险，任何量都不行）</li>
+<li><strong>深蹲/硬拉/弓步/跑步机</strong>（腿没恢复，会升肌酐）</li>
+<li><strong>HIIT冲刺类</strong>（升肌酐+降睾酮）</li>
+<li><strong>熬夜超过23:30</strong>（睾酮在深睡合成）</li>
+<li><strong>刷擦边+不释放</strong>（毁掉3个月成果）</li>
+<li><strong>按摩店/嫖娼</strong>（感染+法律+路径）</li>
+<li><strong>自行停药</strong>（必须吃满14天，否则耐药）</li>
+<li><strong>辛辣火锅烧烤</strong>（胃黏膜脆弱）</li>
+<li><strong>抗生素+铝酸铋同时</strong>（必须间隔30分钟）</li>
+<li><strong>奶制品后立刻抗生素</strong>（间隔1小时）</li>
+<li><strong>补铁补锌保健品</strong>（干扰抗生素，14天后再补）</li>
+</ul>
+</div>
+
+<div class="alert success">★鼓励与提醒★</div>
+<div class="card">
+<ul>
+<li>手淫用想象，每周1-2次OK</li>
+<li>每天水2000-2500ml，尿色淡黄最佳</li>
+<li>铋剂让大便发黑是正常的</li>
+<li>每天泡脚15-20分钟（水温40-42°C）</li>
+<li>23点前睡，9点起，10小时睡眠</li>
+<li>每周日称体重，目标稳定或降1-2斤</li>
+<li>训练后30分钟内补蛋白20-30g</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="card-title">后续复查时间</div>
+<div class="info-row"><span class="label">14天后</span><span class="value">复查肾功能</span></div>
+<div class="info-row"><span class="label">停药4周后</span><span class="value">C13/C14呼气试验</span></div>
+<div class="info-row"><span class="label">2个月后</span><span class="value">复查性激素6项</span></div>
+<div class="info-row"><span class="label">3个月后</span><span class="value">糖化血红蛋白</span></div>
+<div class="info-row"><span class="label">6-12个月</span><span class="value">肝脏彩超</span></div>
+</div>
+
+<div class="card">
+<div class="card-title">紧急情况立即就医</div>
+<ul>
+<li>皮疹、呼吸困难（青霉素过敏）</li>
+<li>严重腹泻、剧烈腹痛</li>
+<li>真正柏油样黑便伴腹痛（不是普通铋剂致黑便）</li>
+<li>持续呕吐、黄疸</li>
+<li>任何让您觉得不对劲的严重不适</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<script>
+const START_DATE = new Date('2026-04-17');
+const TOTAL_DAYS = 14;
+
+const DAY_TYPES = ['公司日','在家日','在家日','通勤日','公司日','公司日','通勤日','公司日','在家日','在家日','通勤日','公司日','公司日','通勤日'];
+const WORKOUTS = [
+  '休息（凯格尔3组）',
+  '蛙泳 40分钟',
+  '★彻底休息日（只散步+凯格尔）',
+  '快走 30分钟',
+  '健身房A日（胸肩三头）',
+  '蛙泳 40分钟',
+  '健身房B日（背二头）',
+  '快走 40分钟（饭后）',
+  '蛙泳 50分钟',
+  '★彻底休息日',
+  '快走 30分钟',
+  '健身房A日',
+  '蛙泳 40分钟',
+  '健身房B日'
+];
+const FOCUS = [
+  '吃药第2天，建立节奏',
+  '首次游泳',
+  '完全放松做饭',
+  '通勤日轻量',
+  '力量训练日',
+  '有氧',
+  '力量训练日',
+  '轻心肺',
+  '强化有氧',
+  '彻底放松',
+  '通勤日',
+  '力量日',
+  '游泳',
+  '疗程最后一天！'
+];
+
+const MEALS = [
+  {b:'水煮蛋2+燕麦粥+牛奶200ml',l:'带饭：鸡胸肉150g+西兰花+糙米饭半碗',d:'煎鱼100g+炒菠菜+蒸红薯1个',s:'上午扁桃仁10颗｜下午酸奶'},
+  {b:'煎蛋3+牛油果半+全麦1片+黑咖啡',l:'牛肉片150g炒芥蓝+糙米饭半碗+番茄蛋汤',d:'清蒸鱼200g+蒜蓉空心菜+蒸南瓜',s:'上午核桃10颗｜下午蓝莓'},
+  {b:'牡蛎煎蛋（3只+2蛋）+无糖豆浆+拌豆腐',l:'卤牛腱150g+凉拌黄瓜+蒸土豆+紫菜汤',d:'虾仁炒西兰花+豆腐+糙米饭半碗',s:'上午酸奶+奇亚籽｜下午苹果'},
+  {b:'煮蛋2+燕麦泡牛奶+香蕉',l:'带饭：鸡胸+烤彩椒+糙米饭半碗',d:'虾仁100g快炒+生菜沙拉+蒸红薯',s:'上午腰果10颗｜下午酸奶'},
+  {b:'蒸蛋（2蛋+虾仁）+全麦1片+牛奶',l:'带饭：昨晚多做+1把坚果',d:'训练后：煎鱼150g+凉拌菠菜+蒸土豆',s:'上午南瓜子｜训后乳清蛋白或2煮蛋'},
+  {b:'燕麦粥+2水煮蛋+1把蓝莓',l:'带饭：卤鸡腿去皮+西兰花+糙米饭半碗',d:'游泳后：牛肉炒彩椒+豆腐蛋花汤+蒸南瓜',s:'上午酸奶｜下午核桃10颗'},
+  {b:'水煮蛋2+燕麦泡牛奶+苹果',l:'带饭：昨晚多做+坚果',d:'训练后：虾仁炒芦笋+煎蛋2+蒸土豆',s:'上午扁桃仁｜训后2煮蛋+牛奶'},
+  {b:'煎蛋3+牛油果半+黑咖啡',l:'带饭：鸡胸150g+烤胡萝卜+糙米饭半碗',d:'清蒸鱼200g+炒芥蓝+蒸红薯',s:'上午核桃10颗｜下午酸奶'},
+  {b:'煎3蛋+牛油果+全麦+菠菜炒蛋',l:'游泳后：牛肉片200g炒彩椒+糙米饭半碗+番茄汤',d:'烤鱼150g+蒜蓉西兰花+蒸南瓜+紫菜汤',s:'上午腰果｜下午酸奶+蓝莓'},
+  {b:'牡蛎煎蛋（3只）+燕麦粥+无糖豆浆',l:'煎牛排150g+凉拌菠菜+蒸土豆+味噌汤',d:'虾仁炒豆腐+清炒菜心+糙米饭半碗',s:'上午南瓜子｜下午苹果+核桃'},
+  {b:'2水煮蛋+燕麦泡牛奶+香蕉',l:'带饭：昨晚多做+坚果',d:'虾仁100g快炒+生菜沙拉+蒸红薯',s:'上午扁桃仁｜下午酸奶'},
+  {b:'蒸蛋（2蛋）+全麦+牛奶+蓝莓',l:'带饭：鸡腿去皮+西兰花+糙米饭半碗',d:'训练后：煎鱼150g+凉拌菠菜+蒸土豆',s:'上午核桃｜训后2煮蛋'},
+  {b:'煎蛋3+燕麦粥+1勺亚麻籽',l:'带饭：牛肉炒时蔬+糙米饭半碗',d:'游泳后：虾仁豆腐汤+清炒菜心+蒸南瓜',s:'上午酸奶｜下午苹果'},
+  {b:'煮蛋2+燕麦泡牛奶+香蕉',l:'带饭：昨晚多做+坚果',d:'★庆祝：煎牛排150g+烤彩椒+蒸土豆+菠菜汤',s:'上午坚果｜训后2煮蛋'}
+];
+
+function getDayIndex(){
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const diff = Math.floor((now - START_DATE) / (1000*60*60*24));
+  return Math.max(0, Math.min(13, diff));
+}
+
+function formatDate(dayIdx){
+  const d = new Date(START_DATE);
+  d.setDate(d.getDate() + dayIdx);
+  const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+  return (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+}
+
+function getWeekday(dayIdx){
+  const d = new Date(START_DATE);
+  d.setDate(d.getDate() + dayIdx);
+  return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+}
+
+function getSchedule(dayIdx){
+  const dt = DAY_TYPES[dayIdx];
+  if (dt === '在家日') return HOME_SCHEDULE;
+  if (dayIdx === 4 || dayIdx === 6 || dayIdx === 11 || dayIdx === 13) return GYM_SCHEDULE;
+  return OTHER_SCHEDULE;
+}
+
+const HOME_SCHEDULE = [
+  ['9:00','起床+300ml温水','normal'],
+  ['9:15','艾普拉唑（空腹）','drug'],
+  ['9:45','早餐','meal'],
+  ['10:15','阿莫西林+呋喃唑酮','drug'],
+  ['10:45','复方铝酸铋','drug'],
+  ['11:00','凯格尔第1组','kegel'],
+  ['11:30','训练（按日程）','exercise'],
+  ['13:00','午餐+鱼油2粒+维D','meal'],
+  ['14:30','复方铝酸铋','drug'],
+  ['15:30','加餐','meal'],
+  ['16:00','凯格尔第2组','kegel'],
+  ['17:30','散步+晒太阳','exercise'],
+  ['18:45','艾普拉唑（空腹）','drug'],
+  ['19:15','晚餐+鱼油1粒','meal'],
+  ['19:45','阿莫西林+呋喃唑酮','drug'],
+  ['20:15','复方铝酸铋','drug'],
+  ['21:00','凯格尔第3组+拉伸','kegel'],
+  ['21:30','泡脚15-20分钟','exercise'],
+  ['22:15','放下手机','normal'],
+  ['23:00','入睡','normal']
+];
+
+const GYM_SCHEDULE = [
+  ['9:00','起床+300ml温水','normal'],
+  ['9:15','艾普拉唑（空腹）','drug'],
+  ['9:45','早餐（高蛋白）','meal'],
+  ['10:15','阿莫西林+呋喃唑酮','drug'],
+  ['10:45','复方铝酸铋','drug'],
+  ['11:00','凯格尔第1组','kegel'],
+  ['12:30','午餐+鱼油2粒+维D','meal'],
+  ['14:30','复方铝酸铋','drug'],
+  ['15:30','加餐（蛋白+坚果）','meal'],
+  ['16:00','凯格尔第2组','kegel'],
+  ['18:00','健身房训练（40-45min）','exercise'],
+  ['19:30','训练后补水+蛋白','meal'],
+  ['19:45','艾普拉唑（空腹）','drug'],
+  ['20:15','晚餐+鱼油1粒','meal'],
+  ['20:45','阿莫西林+呋喃唑酮','drug'],
+  ['21:15','复方铝酸铋','drug'],
+  ['21:45','凯格尔第3组+拉伸','kegel'],
+  ['22:00','泡脚','exercise'],
+  ['22:30','放下手机','normal'],
+  ['23:00','入睡','normal']
+];
+
+const OTHER_SCHEDULE = [
+  ['9:00','起床+300ml温水','normal'],
+  ['9:15','艾普拉唑（空腹）','drug'],
+  ['9:45','早餐','meal'],
+  ['10:15','阿莫西林+呋喃唑酮','drug'],
+  ['10:45','复方铝酸铋','drug'],
+  ['11:00','凯格尔第1组','kegel'],
+  ['13:00','午餐+鱼油2粒+维D','meal'],
+  ['14:30','复方铝酸铋','drug'],
+  ['15:30','加餐','meal'],
+  ['16:00','凯格尔第2组','kegel'],
+  ['18:30','游泳/快走（按日程）','exercise'],
+  ['19:30','艾普拉唑（空腹）','drug'],
+  ['20:00','晚餐+鱼油1粒','meal'],
+  ['20:30','阿莫西林+呋喃唑酮','drug'],
+  ['21:00','复方铝酸铋','drug'],
+  ['21:30','凯格尔第3组+拉伸','kegel'],
+  ['22:00','泡脚','exercise'],
+  ['22:15','放下手机','normal'],
+  ['23:00','入睡','normal']
+];
+
+function getStorageKey(dayIdx, timeIdx){
+  return 'check_' + dayIdx + '_' + timeIdx;
+}
+
+function isChecked(dayIdx, timeIdx){
+  try { return localStorage.getItem(getStorageKey(dayIdx, timeIdx)) === '1'; } catch(e){ return false; }
+}
+
+function setChecked(dayIdx, timeIdx, val){
+  try { localStorage.setItem(getStorageKey(dayIdx, timeIdx), val ? '1' : '0'); } catch(e){}
+}
+
+function renderToday(){
+  const idx = getDayIndex();
+  const date = formatDate(idx);
+  const dow = getWeekday(idx);
+  const schedule = getSchedule(idx);
+  const meal = MEALS[idx];
+  
+  let done = 0;
+  schedule.forEach((_, i) => { if (isChecked(idx, i)) done++; });
+  const pct = Math.round(done / schedule.length * 100);
+  
+  let html = `
+<div class="celebrate">
+<h3>第 ${idx+1} 天 / 共14天</h3>
+<p>${date} ${dow} · ${DAY_TYPES[idx]} · ${WORKOUTS[idx]}</p>
+</div>
+
+<div class="card">
+<div class="card-title">今日进度</div>
+<div class="big-num">${pct}%</div>
+<div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+<p class="small" style="text-align:center">已完成 ${done} / ${schedule.length} 项</p>
+</div>
+
+<div class="card">
+<div class="card-title">今日时间表</div>`;
+  
+  schedule.forEach((slot, i) => {
+    const checked = isChecked(idx, i);
+    html += `
+<div class="time-slot">
+<span class="time">${slot[0]}</span>
+<span class="task ${slot[2] === 'normal' ? '' : slot[2]}">${slot[1]}</span>
+<div class="checkbox ${checked?'checked':''}" onclick="toggleCheck(${idx},${i},this)"></div>
+</div>`;
+  });
+  
+  html += `</div>
+
+<div class="card">
+<div class="card-title">今日三餐</div>
+<div class="meal-card"><h4>早餐</h4><p>${meal.b}</p></div>
+<div class="meal-card"><h4>午餐</h4><p>${meal.l}</p></div>
+<div class="meal-card"><h4>晚餐</h4><p>${meal.d}</p></div>
+<div class="meal-card"><h4>加餐</h4><p>${meal.s}</p></div>
+</div>
+
+<div class="card">
+<div class="card-title">今日重点</div>
+<p>${FOCUS[idx]}</p>
+</div>`;
+  
+  document.getElementById('today-content').innerHTML = html;
+}
+
+function toggleCheck(dayIdx, timeIdx, el){
+  const was = el.classList.contains('checked');
+  el.classList.toggle('checked');
+  setChecked(dayIdx, timeIdx, !was);
+  // 更新进度
+  if (document.getElementById('today').classList.contains('active')) {
+    setTimeout(renderToday, 100);
+  }
+  if (document.getElementById('stats').classList.contains('active')) {
+    setTimeout(renderStats, 100);
+  }
+}
+
+function renderCalendar(){
+  const selector = document.getElementById('day-selector');
+  const today = getDayIndex();
+  let html = '';
+  for (let i = 0; i < 14; i++){
+    const cls = i === today ? 'active today' : '';
+    html += `<div class="day-btn ${cls}" data-idx="${i}" onclick="selectDay(${i})">
+<span class="dow">${getWeekday(i)}</span>
+<span class="date">${formatDate(i)}</span>
+</div>`;
+  }
+  selector.innerHTML = html;
+  selectDay(today);
+}
+
+function selectDay(idx){
+  document.querySelectorAll('.day-btn').forEach((b,i) => {
+    b.classList.toggle('active', i === idx);
+  });
+  const schedule = getSchedule(idx);
+  const meal = MEALS[idx];
+  let html = `
+<div class="alert">${DAY_TYPES[idx]} · ${WORKOUTS[idx]}</div>
+<h4 style="margin:12px 0 8px;color:#2C5282">时间表</h4>`;
+  
+  schedule.forEach((slot, i) => {
+    const checked = isChecked(idx, i);
+    html += `
+<div class="time-slot">
+<span class="time">${slot[0]}</span>
+<span class="task ${slot[2] === 'normal' ? '' : slot[2]}">${slot[1]}</span>
+<div class="checkbox ${checked?'checked':''}" onclick="toggleCheck(${idx},${i},this)"></div>
+</div>`;
+  });
+  
+  html += `<h4 style="margin:16px 0 8px;color:#2C5282">三餐</h4>
+<div class="meal-card"><h4>早餐</h4><p>${meal.b}</p></div>
+<div class="meal-card"><h4>午餐</h4><p>${meal.l}</p></div>
+<div class="meal-card"><h4>晚餐</h4><p>${meal.d}</p></div>
+<div class="meal-card"><h4>加餐</h4><p>${meal.s}</p></div>`;
+  
+  document.getElementById('day-detail').innerHTML = html;
+}
+
+function renderMeals(){
+  const idx = getDayIndex();
+  const meal = MEALS[idx];
+  document.getElementById('today-meals').innerHTML = `
+<div class="meal-card"><h4>今日早餐</h4><p>${meal.b}</p></div>
+<div class="meal-card"><h4>今日午餐</h4><p>${meal.l}</p></div>
+<div class="meal-card"><h4>今日晚餐</h4><p>${meal.d}</p></div>
+<div class="meal-card"><h4>今日加餐</h4><p>${meal.s}</p></div>`;
+  
+  let html = '';
+  MEALS.forEach((m, i) => {
+    html += `<div style="margin-bottom:16px">
+<h4 style="color:#2C5282;margin-bottom:8px;font-size:14px">${formatDate(i)} ${getWeekday(i)}</h4>
+<div class="meal-card"><h4>早</h4><p>${m.b}</p></div>
+<div class="meal-card"><h4>午</h4><p>${m.l}</p></div>
+<div class="meal-card"><h4>晚</h4><p>${m.d}</p></div>
+<div class="meal-card"><h4>加餐</h4><p>${m.s}</p></div>
+</div>`;
+  });
+  document.getElementById('all-meals').innerHTML = html;
+}
+
+function renderStats(){
+  const today = getDayIndex();
+  let totalDone = 0;
+  let totalItems = 0;
+  const dailyStats = [];
+  
+  for (let d = 0; d <= today; d++){
+    const schedule = getSchedule(d);
+    let done = 0;
+    schedule.forEach((_, i) => { if (isChecked(d, i)) done++; });
+    totalDone += done;
+    totalItems += schedule.length;
+    dailyStats.push({idx: d, done, total: schedule.length, pct: Math.round(done/schedule.length*100)});
+  }
+  
+  const overallPct = totalItems > 0 ? Math.round(totalDone / totalItems * 100) : 0;
+  
+  let html = `
+<div class="card">
+<div class="card-title">总体进度</div>
+<div class="big-num">${overallPct}%</div>
+<div class="progress"><div class="progress-bar" style="width:${overallPct}%"></div></div>
+<p class="small" style="text-align:center">累计完成 ${totalDone} / ${totalItems} 项</p>
+</div>
+
+<div class="stat-grid">
+<div class="stat-card">
+<div class="num">${today + 1}</div>
+<div class="lbl">第几天</div>
+</div>
+<div class="stat-card">
+<div class="num">${14 - today - 1}</div>
+<div class="lbl">剩余天数</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">每日进度</div>`;
+  
+  dailyStats.forEach(s => {
+    const isToday = s.idx === today;
+    html += `
+<div class="info-row">
+<span class="label">${formatDate(s.idx)} ${getWeekday(s.idx)} ${isToday ? '(今天)' : ''}</span>
+<span class="value">${s.pct}% (${s.done}/${s.total})</span>
+</div>`;
+  });
+  
+  html += `</div>
+
+<div class="card">
+<div class="card-title">目标追踪</div>
+<div class="info-row"><span class="label">硬度/晨勃</span><span class="value">观察中</span></div>
+<div class="info-row"><span class="label">体重变化</span><span class="value">每周日称</span></div>
+<div class="info-row"><span class="label">腿部恢复</span><span class="value">不酸即可</span></div>
+<div class="info-row"><span class="label">幽门螺杆菌</span><span class="value">停药4周后检查</span></div>
+<div class="info-row"><span class="label">睾酮</span><span class="value">2个月后复查</span></div>
+</div>
+
+<button class="btn-clear" onclick="clearAll()">清除所有打卡记录</button>`;
+  
+  document.getElementById('stats-content').innerHTML = html;
+}
+
+function clearAll(){
+  if (confirm('确定清除所有打卡记录？这不会影响计划本身')){
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i);
+        if (k && k.startsWith('check_')) keys.push(k);
+      }
+      keys.forEach(k => localStorage.removeItem(k));
+    } catch(e){}
+    renderStats();
+    renderToday();
+  }
+}
+
+// 切换tab
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const target = t.getAttribute('data-tab');
+    document.getElementById(target).classList.add('active');
+    if (target === 'today') renderToday();
+    if (target === 'calendar') renderCalendar();
+    if (target === 'meals') renderMeals();
+    if (target === 'stats') renderStats();
+  });
+});
+
+// 初始化
+renderToday();
+</script>
+
+</body>
+</html>
